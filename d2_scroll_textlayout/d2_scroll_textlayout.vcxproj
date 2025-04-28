@@ -127,7 +127,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="graphics_helper.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="text_layout_component.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />

@@ -9,14 +9,9 @@
 
 #include <string>
 
-//template to release resources
-template<class T>
-void safe_release(T** obj)
-{
-	if ((*obj) == nullptr) return;
-	(*obj)->Release();
-	(*obj) = nullptr;
-}
+//app
+#include "graphics_helper.h"
+#include "text_layout_component.h"
 
 //win32 messages callback
 LRESULT CALLBACK window_proc(HWND, UINT, WPARAM, LPARAM);
@@ -97,43 +92,10 @@ void render(HWND w)
 
 	const auto size = render_target->GetSize();
 
+	text_layout_component_ text_layout_component;
+	text_layout_component.render(size, render_target, dwrite_fac, p_text_format, text_to_draw, scroll_offset_y, p_black_brush);
 
-	//to create a text "region" clip it
-	D2D1_RECT_F clip_rect = { 0.0f, 0.0f, size.width, size.height };
-	render_target->PushAxisAlignedClip(clip_rect, D2D1_ANTIALIAS_MODE_ALIASED);
-
-	//2. Create a text layout
-	IDWriteTextLayout* p_text_layout = nullptr;
-	auto hr = dwrite_fac->CreateTextLayout(text_to_draw.c_str(), text_size, p_text_format, size.width, clip_rect.bottom, &p_text_layout);
-	if (FAILED(hr)) return;
-
-	//clamp scroll
-	//1. update factor to the line height
-	DWRITE_TEXT_METRICS text_metric = { 0 };
-	hr = p_text_layout->GetMetrics(&text_metric);
-	if (FAILED(hr)) return;
-	font_factor = text_metric.height / text_metric.lineCount;
-	if (text_metric.height > clip_rect.bottom)
-	{
-		const auto number_of_lines = std::count(text_to_draw.begin(), text_to_draw.end(), '\n');
-		const auto content_height = number_of_lines * font_factor;
-		const auto max_scroll = std::max(0.0f, content_height - clip_rect.bottom);
-		scroll_offset_y = std::min(scroll_offset_y, max_scroll + font_factor); //bottom
-		scroll_offset_y = std::max(scroll_offset_y, 0.0f); //top
-	}
-	else
-	{
-		scroll_offset_y = 0.0f;
-	}
-
-	//3. Draw with scroll to test
-	D2D1_POINT_2F origin = { 0.0f, -scroll_offset_y }; // y (up/down / vertical)
-	render_target->DrawTextLayout(origin, p_text_layout, p_black_brush);
-
-	safe_release(&p_text_layout);
-	render_target->PopAxisAlignedClip();
-
-	hr = render_target->EndDraw();
+	auto hr = render_target->EndDraw();
 	if (FAILED(hr))
 	{
 		destroy_resources();
