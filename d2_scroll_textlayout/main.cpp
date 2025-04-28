@@ -6,28 +6,26 @@ LRESULT CALLBACK window_proc(HWND w, UINT m, WPARAM w_param, LPARAM l_param)
 	{
 	case WM_CREATE:
 	{
-		if (!create_facs()) return -3;
-		if (!create_resources(w)) return -4;
+		d2_engine = std::make_unique<d2_engine_>(w);
+		d2_engine->set_text_to_draw(text_to_draw);
 	}
 	return 0;
 	case WM_PAINT:
-		render(w);
+		d2_engine->render();
 		ValidateRect(w, nullptr);
 		return 0;
 	case WM_SIZE:
-		resize(LOWORD(l_param), HIWORD(l_param));
+		d2_engine->resize(LOWORD(l_param), HIWORD(l_param));
 		return 0;
 	case WM_MOUSEWHEEL:
 	{
 		const float wheel = GET_WHEEL_DELTA_WPARAM(w_param);
-		scroll_offset_y -= (font_factor * (wheel / WHEEL_DELTA));
+		d2_engine->set_wheel(wheel);
 		//redraw (send a WM_PAINT)
 		InvalidateRect(w, nullptr, FALSE);
 	}
 	return 0;
-	case WM_CLOSE:
-		destroy_facs();
-		destroy_resources();
+	case WM_CLOSE:		
 		DestroyWindow(w);
 		return 0;
 	case WM_DESTROY:

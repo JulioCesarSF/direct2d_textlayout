@@ -20,8 +20,14 @@
     <ClInclude Include="graphics_helper.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="d2_engine.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="d2_engine.cpp">
+      <Filter>graphics</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>
